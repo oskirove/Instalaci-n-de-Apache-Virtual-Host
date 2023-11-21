@@ -1,0 +1,15 @@
+zone "fabulasoscuras.com" {
+	type master;
+	file "/var/lib/bind/db.fabulasoscuras.com";
+	allow-query {
+		any;
+		};
+	};
+
+zone "fabulasmaravillosas.com" {
+	type master;
+	file "/var/lib/bind/db.fabulasmaravillosas.com";
+	allow-query {
+		any;
+		};
+	};
