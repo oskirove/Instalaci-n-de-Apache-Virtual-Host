@@ -1,6 +1,6 @@
 $TTL 38400	; 10 hours 40 minutes
-@		IN SOA	ns.fabulasmaravillosas.com. info@fabulasmaravillosas.com. (
-				10000002   ; serial
+@		IN SOA	ns.fabulasmaravillosas.com. info.fabulasmaravillosas.com. (
+				10000003   ; serial
 				10800      ; refresh (3 hours)
 				3600       ; retry (1 hour)
 				604800     ; expire (1 week)
