@@ -1,7 +1,16 @@
 # Instalacion y configuración de un servidor Apache y Virtual Host
 
+# Índice
+
+1. [Configuración de Apache con Docker Compose](#Configuración-de-Apache-con-Docker-Compose)
+2. [Configuración de DNS BIND9 en Docker Compose](#Configuración-de-DNS-BIND9-en-Docker-Compose)
+3. [Creación de la Red y Asignación de Direcciones IP](#Creación-de-la-Red-y-Asignación-de-Direcciones-IP)
+4. [Configuramos el Contenido de ./conf del DNS](#Configuramos-el-Contenido-de-./conf-del-DNS)
+5. [Configuramos el Contenido de ./zonas del DNS](#Configuramos-el-Contenido-de-./zonas-del-DNS)
+6. [Implementación del Cliente en Docker Compose](#Implementación-del-Cliente-en-Docker-Compose)
+
 ## Configuración de Apache con Docker Compose
-En primer lugar debemos crear los directorios `./paginas` y `./conf` donde incluiremos los ficheros del sitio que queremos mostrar y la configuración de básica de **Apache**.
+En primer lugar debemos crear los directorios `./paginas` y `./conf` donde incluiremos los ficheros del sitio que queremos mostrar y la configuración básica de **Apache**.
 
 Para llevar a cabo la instalación y configuración de este, el primer paso es crear nuestro fichero `docker-compose.yml`. En este archivo, incluiremos la configuración básica que consta de la definición del nombre del contenedor, la especificación de la imagen de **Apache** a utilizar, el mapeo de puertos y la configuración de volúmenes.
 
@@ -25,7 +34,7 @@ A continuación, procedemos a añadir al **directorio `./conf`** los archivos de
 
 > **docker run --rm httpd:latest cat /usr/local apache2/conf/mime.types > ./conf/mime.types**
 
-> **docker run --rm httpd:latest cat /usr/local/apache2/conf/httpd.conf > miconf.conf**
+> **docker run --rm httpd:latest cat /usr/local/apache2/conf/httpd.conf > ./conf/httpd.conf**
 
 >[!TIP]
 >Los **comandos** proporcionados anteriormente son **utilizados para extraer archivos de configuración específicos del contenedor de Apache y guardarlos localmente**. Estos comandos deben ejecutarse después de haber creado el contenedor, ya que están destinados a obtener ciertos archivos de configuración del contenedor en ejecución.
@@ -67,7 +76,7 @@ Una vez que hayamos completado el paso anterior, procederemos a crear la siguien
 
 Después de crear la red **practica_fabulas**, ajustaremos el archivo **`docker-compose.yml`** para asignar una **IP** estática a cada contenedor de nuestro fichero.
 
-<sup>**A continuación, se muestra un ejemplo de como se vería el fichero con la red y las IP confiuradas:**</sup>
+<sup>**A continuación, se muestra un ejemplo de como se vería el fichero con la red y las IP configuradas:**</sup>
 
 ```yml
 services:
@@ -76,11 +85,11 @@ services:
     image: httpd:latest
     ports:
       - "80:80"
-    #Definimos la red y la IP que utilizará el Apache
+    # Definimos la red y la IP que utilizará el Apache
     networks:
       practica_fabulas:
         ipv4_address: 192.168.1.3
-    #Especificamos el DNS que utilizará el contenedor para resolver nombres de dominio.
+    # Especificamos el DNS que utilizará el contenedor para resolver nombres de dominio.
     dns:
       - 192.168.1.2
     volumes:
@@ -92,7 +101,7 @@ DNS:
     platform: linux/arm64
     ports:
       - "53:53"
-    #Definimos la red y la IP que utilizará el DNS
+    # Definimos la red y la IP que utilizará el DNS
     networks:
       practica_fabulas:
         ipv4_address: 192.168.1.2
@@ -100,7 +109,7 @@ DNS:
       - ./conf:/etc/bind
       - ./zonas:/var/lib/bind
 
-#Definimos la red que vamos a utilizar
+# Definimos la red que vamos a utilizar
 networks:
   practica_fabulas:
     external: true
@@ -113,7 +122,7 @@ networks:
 
 En primer lugar vamos a comenzar creando cuatro ficheros en el directorio **`./conf`**, llamados: `named.conf`, `named.conf.default-zones`, `named.conf.local` y `named.conf.options`.
 ##
-En el fichero **`named.conf`**, incluiremos lo siguiente:
+- En el fichero **`named.conf`**, incluiremos lo siguiente:
 
 ```bash
 include "/etc/bind/named.conf.options";
@@ -124,7 +133,7 @@ include "/etc/bind/named.conf.default-zones";
 >[!NOTE]
 >El archivo **`named.conf`** contiene la **configuración principal** del servidor DNS BIND, incluyendo *opciones generales, registros de actividad, y definiciones de zonas* con sus archivos asociados.
 ##
-En el fichero **`named.conf.default-zones`** definiremos los siguientes parámetros:
+- En el fichero **`named.conf.default-zones`** definiremos los siguientes parámetros:
 
 ```conf
 // prime the server with knowledge of the root servers
@@ -159,7 +168,7 @@ zone "255.in-addr.arpa" {
 >[!NOTE]
 >El archivo **`named.conf.default-zones`** contiene **configuraciones predeterminadas** para zonas especiales en un servidor DNS BIND, como la **zona raíz** y las **zonas inversas** para direcciones IP privadas. Incluye definiciones para asegurar la correcta resolución de nombres y direcciones IP, proporcionando un punto de partida para la configuración del **servidor DNS**.
 ##
-En el fichero **`named.conf.local`** definiremos lo siguiente:
+- En el fichero **`named.conf.local`** definiremos lo siguiente:
 
 ```conf
 zone "fabulasoscuras.com" {
@@ -182,7 +191,7 @@ zone "fabulasmaravillosas.com" {
 >El archivo `named.conf.local` contiene **configuraciones específicas de zonas locales** para el servidor DNS BIND. En el ejemplo proporcionado, se definen dos zonas, ***fabulasoscuras.com*** y ***fabulasmaravillosas.com***, como maestras (`type master`). Cada zona tiene su **propio archivo de zona asociado** que especifica la ubicación y configuración de los registros de esa zona.
 Además, se establece la permisividad para realizar consultas (`allow-query`) desde cualquier origen (`any`) en ambas zonas. Esto significa que el servidor DNS permitirá consultas de cualquier fuente para estas zonas específicas. **Estas configuraciones son típicas para configurar autoridad local sobre dominios específicos en un entorno DNS.**
 ##
-En el fichero **`named.conf.options`** definiremos los siguientes parámetros:
+- En el fichero **`named.conf.options`** definiremos los siguientes parámetros:
 
 ```conf
 options {
@@ -209,7 +218,7 @@ options {
 
 Dentro del directorio **`./zonas`** vamos a crear dos ficheros llamados `db.fabulasmaravillosas.com` y `db.fabulasoscuras.com`.
 
-En el fichero **`db.fabulasmaravillosas.com`** incluiremos la siguiente información:
+- En el fichero **`db.fabulasmaravillosas.com`** incluiremos la siguiente información:
 
 ```sql
 $TTL 38400	; 10 hours 40 minutes
@@ -226,7 +235,7 @@ www		IN A		192.168.1.2
 alias	IN CNAME	www
 texto	IN TXT		"Hola mundo"
 ```
-Por otra parte en el fichero **`db.fabulasoscuras.com`** incluiremos lo siguiente:
+- Por otra parte en el fichero **`db.fabulasoscuras.com`** incluiremos lo siguiente:
 
 ```sql
 $TTL 38400	; 10 hours 40 minutes
@@ -245,3 +254,62 @@ texto	IN TXT		"Hola mundo"
 ```
 >[!NOTE]
 >Las bases de datos de las zonas **`db.fabulasoscuras.com`** y **`db.fabulasmaravillosas.com`** definen la resolución de nombres para los dominios ***fabulasoscuras.com*** y ***fabulasmaravillosas.com***. Incluye registros **SOA** para la autoridad de la zona, **NS** para el servidor de nombres, **A** para asociar nombres de host con direcciones IP, **CNAME** para alias, y **TXT** para texto asociado. Estos registros son fundamentales para la resolución de nombres y otros servicios en el servidor DNS para el dominio mencionado.
+
+## Implementación del Cliente en Docker Compose
+
+El servicio **cliente** en el archivo **`docker-compose.yml`** se implementa mediante un contenedor basado en la imagen **Ubuntu**, específicamente para la arquitectura **linux/arm64**. Se asigna un nombre al contenedor **(cliente)** y se configura para tener un terminal interactivo **(`tty: true`)** y mantener abierto el canal de entrada estándar **(`stdin_open: true`)**, lo que facilita la interacción con el contenedor.
+
+Además, se especifica la configuración del servidor **DNS** que utilizará el contenedor para **resolver nombres de dominio**. En este caso, se ha configurado con la dirección IP `192.168.1.2`. El contenedor se integra en la red denominada **practica_fabulas** y se le asigna la dirección IP `192.168.1.4` en esa red.
+
+<sup>**A continuación, se muestra un ejemplo de como se vería el fichero con el cliente implementado:**</sup>
+
+```yml
+services:
+  web:
+    container_name: apache_practica
+    image: httpd:latest
+    ports:
+      - "80:80"
+    # Definimos la red y la IP que utilizará el Apache.
+    networks:
+      practica_fabulas:
+        ipv4_address: 192.168.1.3
+    # Especificamos el DNS que utilizará el contenedor para resolver nombres de dominio.
+    dns:
+      - 192.168.1.2
+    volumes:
+      - ./paginas:/usr/local/apache2/htdocs
+      - ./conf:/usr/local/apache2/conf:rw
+  DNS:
+    container_name: DNS_bind9
+    image: ubuntu/bind9
+    platform: linux/arm64
+    ports:
+      - "53:53"
+    # Definimos la red y la IP que utilizará el DNS.
+    networks:
+      practica_fabulas:
+        ipv4_address: 192.168.1.2
+    volumes:
+      - ./conf:/etc/bind
+      - ./zonas:/var/lib/bind
+  cliente:
+    container_name: cliente
+    image: ubuntu
+    platform: linux/arm64
+    # Asignamos un terminal al contenedor.
+    tty: true
+    # Mantenemos abierto el canal de entrada estándar.
+    stdin_open: true
+    # Configuramos el servidor DNS que utilizará el contenedor.
+    dns:
+      - 192.168.1.2
+    networks:
+      practica_fabulas:
+        ipv4_address: 192.168.1.4
+
+# Definimos la red que vamos a utilizar.
+networks:
+  practica_fabulas:
+    external: true
+```
