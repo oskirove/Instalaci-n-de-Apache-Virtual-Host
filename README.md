@@ -8,6 +8,7 @@
 4. [Configuramos el Contenido de ./conf del DNS](#Configuramos-el-Contenido-de-./conf-del-DNS)
 5. [Configuramos el Contenido de ./zonas del DNS](#Configuramos-el-Contenido-de-./zonas-del-DNS)
 6. [Implementación del Cliente en Docker Compose](#Implementación-del-Cliente-en-Docker-Compose)
+7. [Prueba Resolución de Dominios](#Prueba-Resolución-de-Dominios)
 
 ## Configuración de Apache con Docker Compose
 En primer lugar debemos crear los directorios `./paginas` y `./conf` donde incluiremos los ficheros del sitio que queremos mostrar y la configuración básica de **Apache**.
@@ -313,3 +314,53 @@ networks:
   practica_fabulas:
     external: true
 ```
+## Prueba Resolución de Dominios
+
+Una vez completados todos los pasos anteriores, estaremos listos para iniciar los contenedores mediante el comando **`docker compose up`**
+
+Después de iniciar los tres contenedores (Apache, Bind9, Ubuntu), estaremos preparados para ejecutar el comando **`docker exec -it cliente bash`** y así abrir una terminal de bash dentro del contenedor del cliente.
+
+Luego de acceder a la terminal de bash del **cliente**, procederemos a **instalar** los comandos `ping` y `dig` mediante el siguiente procedimiento:
+
+<sup>**A continuación, se muestran por orden los comandos que se deben ejecutar en la terminal:**</sup>
+
+> **`apt update`**
+
+> **`apt upgrade`**
+
+> **`apt install -y iputils-ping`**
+
+> **`apt install -y dnsutils`**
+
+Una vez hayamos **completado la instalación** de `ping` y `dig`, procederemos a **verificar** la resolución de **nombres de dominio** ejecutando el siguiente comando:
+
+> **`dig www.fabulasoscuras.com`**
+
+Si hemos seguido los pasos correctamente, al ejecutar el comando `dig`, deberíamos obtener una respuesta similar a la siguiente, con el dominio resuelto:
+
+```bash
+; <<>> DiG 9.18.18-0ubuntu0.22.04.1-Ubuntu <<>> www.fabulasoscuras.com
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 28795
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 7995a4504bdf664d01000000655df459774fa71c08476a74 (good)
+;; QUESTION SECTION:
+;www.fabulasoscuras.com.                IN      A
+
+;; ANSWER SECTION:
+www.fabulasoscuras.com. 38400   IN      A       192.168.1.2
+
+;; Query time: 0 msec
+;; SERVER: 127.0.0.11#53(127.0.0.11) (UDP)
+;; WHEN: Wed Nov 22 12:30:17 UTC 2023
+;; MSG SIZE  rcvd: 95
+```
+>[!NOTE]
+> Si hemos seguido los pasos correctamente, al introducir ***www.fabulasmaravillosas.com*** en lugar de ***www.fabulasoscuras.com***, la resolución del dominio también se llevará a cabo de manera correcta.
+
+>[!TIP]
+> Al utilizar el comando **`dig`** para resolver un dominio, es crucial **revisar varios elementos** en la salida del comando para determinar si la resolución fue exitosa. La sección **`ANSWER`** muestra información sobre el dominio consultado, incluyendo la **dirección IP** asociada. Un código de retorno **0** al final de la salida indica una **resolución exitosa**, mientras que la sección **`AUTHORITY`** proporciona detalles sobre los servidores de nombres autoritativos, siendo otro indicador de éxito. Observar el ***tiempo de respuesta* también es importante**, ya que un **tiempo rápido*** sugiere una **resolución exitosa**. **Es fundamental revisar estos elementos para evaluar la corrección de la resolución, especialmente si el dominio tiene múltiples registros.**
