@@ -29,7 +29,7 @@ services:
       - ./conf:/usr/local/apache2/conf:rw
 ```
 
-Después de finalizar el paso anterior, es crucial incorporar los archivos que queremos mostrar al **directorio `./paginas`**, previamente definido en los volúmenes. En mi caso, estos archivos son: `index.html`, `estilos.css` y `script.js`.
+Después de finalizar el paso anterior, es crucial incorporar los archivos que queremos mostrar al **directorio `./paginas`**, previamente definido en los volúmenes. En mi caso, estos archivos son: `index.html`, `estilos1.css` y `script.js`.
 
 A continuación, procedemos a añadir al **directorio `./conf`** los archivos de configuración **`httpd.conf`** y **`mime.types`** mediante los siguientes comandos:
 
@@ -40,7 +40,7 @@ A continuación, procedemos a añadir al **directorio `./conf`** los archivos de
 >[!TIP]
 >Los **comandos** proporcionados anteriormente son **utilizados para extraer archivos de configuración específicos del contenedor de Apache y guardarlos localmente**. Estos comandos deben ejecutarse después de haber creado el contenedor, ya que están destinados a obtener ciertos archivos de configuración del contenedor en ejecución.
 
-## Configuración de DNS BIND9 en Docker Compose
+## Configuración de DNS Bind9 en Docker Compose
 
 Una vez que hayamos configurado los parámetros básicos del **Apache**, el siguiente paso es crear dos directorios ***(en otra carpeta diferente a la del Apache)*** llamados `./conf` y `./zonas` e incorporar la configuración básica del **DNS** en nuestro fichero **`docker-compose.yml`**. Esta configuración permitirá que, en una etapa posterior, el **DNS** pueda resolver los dos dominios: ***www.fabulasoscuras.com*** y ***www.fabulasmaravillosas.com***. De esta manera, estaremos preparando nuestro sistema para manejar eficientemente estas dos direcciones web.
 
@@ -316,7 +316,7 @@ networks:
 ```
 ## Prueba Resolución de Dominios
 
-Una vez completados todos los pasos anteriores, estaremos listos para iniciar los contenedores mediante el comando **`docker compose up`**
+Una vez completados todos los pasos anteriores, estaremos listos para iniciar los contenedores mediante el comando **`docker compose up`**.
 
 Después de iniciar los tres contenedores (Apache, Bind9, Ubuntu), estaremos preparados para ejecutar el comando **`docker exec -it cliente bash`** y así abrir una terminal de bash dentro del contenedor del cliente.
 
@@ -363,4 +363,4 @@ www.fabulasoscuras.com. 38400   IN      A       192.168.1.2
 > Si hemos seguido los pasos correctamente, al introducir ***www.fabulasmaravillosas.com*** en lugar de ***www.fabulasoscuras.com***, la resolución del dominio también se llevará a cabo de manera correcta.
 
 >[!TIP]
-> Al utilizar el comando **`dig`** para resolver un dominio, es crucial **revisar varios elementos** en la salida del comando para determinar si la resolución fue exitosa. La sección **`ANSWER`** muestra información sobre el dominio consultado, incluyendo la **dirección IP** asociada. Un código de retorno **0** al final de la salida indica una **resolución exitosa**, mientras que la sección **`AUTHORITY`** proporciona detalles sobre los servidores de nombres autoritativos, siendo otro indicador de éxito. Observar el ***tiempo de respuesta* también es importante**, ya que un **tiempo rápido*** sugiere una **resolución exitosa**. **Es fundamental revisar estos elementos para evaluar la corrección de la resolución, especialmente si el dominio tiene múltiples registros.**
+> Al utilizar el comando **`dig`** para resolver un dominio, es crucial **revisar varios elementos** en la salida del comando para determinar si la resolución fue exitosa. La sección **`ANSWER`** muestra información sobre el dominio consultado, incluyendo la **dirección IP** asociada. Un código de retorno **0** al final de la salida indica una **resolución exitosa**, mientras que la sección **`AUTHORITY`** proporciona detalles sobre los servidores de nombres autoritativos, siendo otro indicador de éxito. Observar el ***tiempo de respuesta* también es importante**, ya que un **tiempo rápido** sugiere una **resolución exitosa**. **Es fundamental revisar estos elementos para evaluar la corrección de la resolución, especialmente si el dominio tiene múltiples registros.**
