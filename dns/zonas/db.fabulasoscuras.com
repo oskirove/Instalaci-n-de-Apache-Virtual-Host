@@ -7,7 +7,7 @@ $TTL 38400	; 10 hours 40 minutes
 				38400      ; minimum (10 hours 40 minutes)
 				)
 @		IN NS	ns.fabulasoscuras.com.
-ns		IN A		192.168.1.5
-www		IN A		192.168.1.2
+ns		IN A		192.168.1.3
+www		IN A		192.168.1.3
 alias	IN CNAME	www
 texto	IN TXT		"Hola mundo"
